@@ -95,6 +95,7 @@ class Chessboard{
         })
 
         this.CTX.canvas.font = '20px serif';
+
         for (let i = 0; i < 8; i++) {
             this.CTX.canvas.fillText(String.fromCharCode(i+"a".charCodeAt(0)), 300/9*(((player=="white")?i:8-i-1)+0.35), 300/9*8.5);
             this.CTX.canvas.fillText(i+1, 300/9*8.5, 300/9*(((player=="white")?8-i-1:i)+0.8));
@@ -104,21 +105,12 @@ class Chessboard{
     // movePiece(coord){
     movePiece(coord, fCoord){
 
-        coord = [ coord[0], coord[1]-1]
-        fCoord = [ fCoord[0], fCoord[1]-1]
-        // findPiece()
-        // console.log(this.CTX.board)
-        // console.log(this.CTX.board[1])
-        // console.log(this.CTX.board[1][1])
-        let piece = this.CTX.board[coord[0]][coord[1]]
-        // console.log(piece)
-        // movePiece()
-            // - move in board
-                this.CTX.board[coord[0]][coord[1]] = null
-                this.CTX.board[fCoord[0]][fCoord[1]] = piece
+        coord = [ coord[1],coord[0]-1]
+        fCoord = [ fCoord[1], fCoord[0]-1]
 
-            // - move piece position
-                piece.pos(fCoord)
+        let piece = this.CTX.board[coord[0]][coord[1]]
+        this.CTX.board[coord[0]][coord[1]] = null
+        this.CTX.board[fCoord[0]][fCoord[1]] = piece
             
     }
     analyzeMove(move){
@@ -148,10 +140,11 @@ class Chessboard{
         console.log(name, pos)
         this.findPiece(name, startRow, fPos, capture)
     }
-    findPiece(name, startRow, fPos, capture){
+    findPos(name, startRow, fPos, capture){
         let possibilities = []
-        let possibility= []
         let i =0
+
+        //possibilities by name
         switch (name[1]) {
             //pion
             case 'p':
@@ -177,82 +170,97 @@ class Chessboard{
                 break;
             //tour
             case 'r':
-                possibilities = [
-                    {
-                        minmax : [-8,8],
-                        possibilities :[
-                            [0, i],
-                            [i, 0]
-                        ]
-                    }
-                ]
+                possibilities = {
+                    minmax : [-8,8],
+                    possibilities :[
+                        [0, i],
+                        [i, 0]
+                    ]
+                }
                 break;
             //fou
             case 'b':
-                possibilities = [
-                    {
-                        minmax : [-8,8],
-                        possibilities :[
-                            [i, i]                        ]
-                    }
-                ]
+                possibilities = {
+                    minmax : [-8,8],
+                    possibilities :[
+                        [i, i]
+                    ]
+                }
                 
                 break;
             //cavalier
             case 'n':
-                possibilities = [
-                    {
-                        minmax : [0,0],
-                        possibilities :[
-                            [-1, 2],
-                            [-1, -2],
-                            [1, 2],
-                            [1, -2],
-                            [2, 1],
-                            [2, -1],
-                            [-2, -1],
-                            [-2, 1],
-                        ]
-                    }
-                ]
+                possibilities ={
+                    minmax : [0,0],
+                    possibilities :[
+                        [-1, 2],
+                        [-1, -2],
+                        [1, 2],
+                        [1, -2],
+                        [2, 1],
+                        [2, -1],
+                        [-2, -1],
+                        [-2, 1],
+                    ]
+                }
                 break;
             //dame
             case 'q':
-                possibilities = [
-                    {
-                        minmax : [-8,8],
-                        possibilities :[
-                            [0, i],
-                            [i, 0],
-                            [i, i]
-                        ]
-                    }
-                ]
+                possibilities = {
+                    minmax : [-8,8],
+                    possibilities :[
+                        [0, i],
+                        [i, 0],
+                        [i, i]
+                    ]
+                }
                 break;
             //roi
             case 'k':
                 max = 1
-                possibilities = [
-                    {
-                        minmax : [0,1],
-                        possibilities :[
-                            [0, i],
-                            [i, 0],
-                            [i, i]
-                        ]
-                    }
-                ]
+                possibilities = {
+                    minmax : [0,1],
+                    possibilities :[
+                        [0, i],
+                        [i, 0],
+                        [i, i]
+                    ]
+                }
                 break;
         
             default:
                 break;
         }
+
+        let piece = null
+        //try possibilities to find the sPos
+        isPlayer = name[0] === this.CTX.player ? 1 : -1
+        for (i = 0; i < possibilities.minmax[1]; i=Math.abs(i)+1) {
+            possibilities.possibilities.forEach(possibility => {
+                piece = this.findPieceByPos(possibility)
+                if (piece !== null)
+                    break
+                if(-1*i>possibilities.minmax[0]){
+                    i*=-1
+                    piece = this.findPieceByPosAndName(name, possibility)
+                    if (piece !== null)
+                        break
+                }
+            });
+        }
     }
+
+    findPiece(name, pos){
+        if(this.CTX.board[pos[0]][pos[1]].name === name){
+            return this.CTX.board[pos[0]][pos[1]]
+        }
+    }
+
+
     animate(){
         if(this.CTX.loaded ==0){
             this.CTX.canvas.clearRect(0, 0, this.case*8, this.case*8)
             this.drawBoard()
-            // chessboard.movePiece([1,2], [1,3]);
         }
     }
 }
