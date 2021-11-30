@@ -108,6 +108,7 @@ class Chessboard{
         coord = [ coord[1],coord[0]-1]
         fCoord = [ fCoord[1], fCoord[0]-1]
 
+        console.log(coor, fCoord)
         let piece = this.CTX.board[coord[0]][coord[1]]
         this.CTX.board[coord[0]][coord[1]] = null
         this.CTX.board[fCoord[0]][fCoord[1]] = piece
@@ -238,13 +239,13 @@ class Chessboard{
         for (i = 0; i < possibilities.minmax[1]; i=Math.abs(i)+1) {
             possibilities.possibilities.forEach(possibility => {
                 piece = this.findPieceByPos(possibility)
-                if (piece !== null)
-                    break
+                // if (piece !== null)
+                //     break
                 if(-1*i>possibilities.minmax[0]){
                     i*=-1
                     piece = this.findPieceByPosAndName(name, possibility)
-                    if (piece !== null)
-                        break
+                    // if (piece !== null)
+                    //     break
                 }
             });
         }
